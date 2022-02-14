@@ -1,0 +1,818 @@
+---
+title: Epigenetic signatures of war and conflict-related trauma - a study of refugee
+  families in Africa
+author: "Katrin Block"
+date: "7 1 2022"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Descriptive Analysis
+
+## Preliminaries
+
+```{r preliminaries}
+setwd("C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung")
+library(psych)
+library(carData)
+library(car)
+library(nortest)
+library(haven)
+library(dplyr)
+library(magrittr)
+library(readxl)
+library(utils)
+library(lmtest)
+library(sandwich)
+library(tibble)
+library(graphics)
+load("~/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/pheno_ct_all_wide.RData")
+View(pheno_ct_all_wide)
+```
+
+```{r}
+ncol(pheno_ct_all_wide) 
+nrow(pheno_ct_all_wide)
+```
+
+## Descriptive Data Children
+
+### Sex Children:
+```{r Sex Children}
+table(pheno_ct_all_wide$Sex_C)
+prop.table(table(pheno_ct_all_wide$Sex_C))
+tab.sex <- table(pheno_ct_all_wide$Sex_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/sex_child.png")
+barplot(tab.sex, ylim = c(0,70), ylab = "Number",col = "black", las = 1, main = "Children: Gender")
+dev.off()
+```
+
+### Age & Birthyear Children:
+```{r Age & Birthyear Children}
+describe(pheno_ct_all_wide$Age_C)
+describeBy(pheno_ct_all_wide$Age_C, pheno_ct_all_wide$Sex_C) # sex differences
+describe(pheno_ct_all_wide$Birthyear_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/age_child.png")
+plot(density(pheno_ct_all_wide$Age_C, na.rm = TRUE), main = "Children: Age", xlab = "Age In Years")
+dev.off()
+```
+
+### Country of Origin:
+```{r Country of Origin}
+table(pheno_ct_all_wide$Country_origin_C)
+tab.origin <- table(pheno_ct_all_wide$Country_origin_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/origin_child.png")
+barplot(tab.origin, ylim = c(0,100), ylab = "number",col = "black", las = 1, main = "Children: Country Origin")
+dev.off()
+```
+
+### Class & School:
+```{r Class & School}
+table(pheno_ct_all_wide$Class_C)
+tab.class <- table(pheno_ct_all_wide$Class_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/class_child.png")
+barplot(tab.class, ylim = c(0,40), ylab = "number",col = "black", las = 1, main = "Children: School Years")
+dev.off()
+table(pheno_ct_all_wide$School_C)
+tab.school <- table(pheno_ct_all_wide$School_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/school_child.png")
+barplot(tab.school, ylim = c(0,40), ylab = "number",col = "black", las = 1, main = "Children: School")
+dev.off()
+```
+
+### Number People at Home:
+```{r Number People at Home}
+describe(pheno_ct_all_wide$Nr_people_home_C)
+describeBy(pheno_ct_all_wide$Nr_people_home_C, pheno_ct_all_wide$Sex_C) # sex differences
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/nr_people_home_child.png")
+plot(density(pheno_ct_all_wide$Nr_people_home_C, na.rm = TRUE), main = "Children: Number of People at Home", xlab = "Number")
+dev.off()
+```
+
+### Number Siblings:
+```{r Number Siblings}
+describe(pheno_ct_all_wide$Nr_siblings_C)
+describeBy(pheno_ct_all_wide$Nr_siblings_C, pheno_ct_all_wide$Sex_C) # sex differences
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/nr_siblings_child.png")
+plot(density(pheno_ct_all_wide$Nr_siblings_C, na.rm = TRUE), main = "Children: Siblings", xlab = "Number")
+dev.off()
+```
+
+### Parents Alive:
+```{r Parents Alive}
+table(pheno_ct_all_wide$parents_alive_C)
+tab.parents <- table(pheno_ct_all_wide$parents_alive_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/parents_alive_child.png")
+barplot(tab.parents, ylim = c(0,120), ylab = "number",col = "black", las = 1, main = "Children: Parents Alive")
+dev.off()
+```
+
+### Living Status:
+```{r Living Status}
+table(pheno_ct_all_wide$living_status_C)
+tab.living_status <- table(pheno_ct_all_wide$living_status_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/living_status_child.png")
+barplot(tab.living_status, ylim = c(0,100), ylab = "number",col = "black", las = 1, main = "Children: Living Status")
+dev.off()
+```
+
+### Number Friends:
+```{r Number Friends}
+describe(pheno_ct_all_wide$Nr_friends_C)
+describeBy(pheno_ct_all_wide$Nr_friends_C, pheno_ct_all_wide$Sex_C) # sex differences
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/nr_friends_child.png")
+plot(density(pheno_ct_all_wide$Nr_friends_C, na.rm = TRUE), main = "Children: Number of Friends", xlab = "Number")
+dev.off()
+```
+
+### Subjective Socioeconomic Status (SES):
+```{r Subjective Socioeconomic Status (SES)}
+table(pheno_ct_all_wide$subjective_ses_C)
+tab.subjective <- table(pheno_ct_all_wide$subjective_ses_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/subjective_child.png")
+barplot(tab.subjective, ylim = c(0,100), ylab = "number",col = "black", las = 1, main = "Children: Subjective SES")
+dev.off()
+```
+
+### SDQ - Hyperactivity:
+```{r SDQ - Hyperactivity}
+describe(pheno_ct_all_wide$sdq_hyper_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_hyper_child.png")
+hist(pheno_ct_all_wide$sdq_hyper_C, main = "Children: Hyperactivity", ylab = "Number", xlab = "SDQ Score for Hyperactivity")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_hyper_child.png")
+plot(density(pheno_ct_all_wide$sdq_hyper_C, na.rm = TRUE), main = "Children: Hyperactivity", xlab = "SDQ Score for Hyperactivity")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_hyper_child.png")
+boxplot(pheno_ct_all_wide$sdq_hyper_C, main = "Boxplot Children: Hyperactivity", ylab = "SDQ Score for Hyperactivity")
+dev.off()
+```
+
+### SDQ - Emotional Problems:
+```{r SDQ - Emotional Problems}
+describe(pheno_ct_all_wide$sdq_emotion_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_emotion_child.png")
+hist(pheno_ct_all_wide$sdq_emotion_C, main = "Children: Emotional Problems", ylab = "Number", xlab = "SDQ Score for Emotional Problems")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_emotion_child.png")
+plot(density(pheno_ct_all_wide$sdq_emotion_C, na.rm = TRUE), main = "Children: Emotional Problems", xlab = "SDQ Score for Emotional Problems")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_emotion_child.png")
+boxplot(pheno_ct_all_wide$sdq_emotion_C, main = "Boxplot Children: Emotional Problems", ylab = "SDQ Score")
+dev.off()
+```
+
+### SDQ - Conduct Problems:
+```{r SDQ - Conduct Problems}
+describe(pheno_ct_all_wide$sdq_conduct_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_conduct_child.png")
+hist(pheno_ct_all_wide$sdq_conduct_C, main = "Children: Conduct Problems", ylab = "Number", xlab = "SDQ Score for Conduct Problems")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_conduct_child.png")
+plot(density(pheno_ct_all_wide$sdq_conduct_C, na.rm = TRUE), main = "Children: Conduct Problems", xlab = "SDQ Score for Conduct Problems")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_conduct_child.png")
+boxplot(pheno_ct_all_wide$sdq_conduct_C, main = "Boxplot Children: Conduct Problems", ylab = "SDQ Score")
+dev.off()
+```
+
+### SDQ - Peer Problems:
+```{r SDQ - Peer Problems}
+describe(pheno_ct_all_wide$sdq_peers_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_peers_child.png")
+hist(pheno_ct_all_wide$sdq_peers_C, main = "Children: Peer Problems", ylab = "Number", xlab = "SDQ Score for Peer Problems")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_peers_child.png")
+plot(density(pheno_ct_all_wide$sdq_peers_C, na.rm = TRUE), main = "Children: Peer Problems", xlab = "SDQ Score for Peer Problems")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_peers_child.png")
+boxplot(pheno_ct_all_wide$sdq_peers_C, main = "Boxplot Children: Peer Problems", ylab = "SDQ Score")
+dev.off()
+```
+
+### SDQ - Prosocial Behavior:
+```{r SDQ - Prosocial Behavior}
+describe(pheno_ct_all_wide$sdq_prosocial_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_prosocial_child.png")
+hist(pheno_ct_all_wide$sdq_prosocial_C, main = "Children: Prosocial Behavior", ylab = "Number", xlab = "SDQ Score for Prosocial Behavior")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_prosocial_child.png")
+plot(density(pheno_ct_all_wide$sdq_prosocial_C, na.rm = TRUE), main = "Children: Prosocial Behavior", xlab = "SDQ Score for Prosocial Behavior")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_prosocial_child.png")
+boxplot(pheno_ct_all_wide$sdq_prosocial_C, main = "Boxplot Children: Prosocial Behavior", ylab = "SDQ Score")
+dev.off()
+```
+
+### SDQ - Total Difficulties Score:
+```{r SDQ - Total Difficulties Score}
+describe(pheno_ct_all_wide$sdq_difficult_C)
+describeBy(pheno_ct_all_wide$sdq_difficult_C, pheno_ct_all_wide$Sex_C) # sex differences
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_sdq_total_child.png")
+hist(pheno_ct_all_wide$sdq_difficult_C, main = "Children: SDQ Total Difficulties Score", ylab = "Number", xlab = "SDQ Total Difficulties Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_sdq_total_child.png")
+plot(density(pheno_ct_all_wide$sdq_difficult_C, na.rm = TRUE), main = "Children: SDQ Total Difficulties Score", xlab = "SDQ Total Difficulties Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_sdq_total_child.png")
+boxplot(pheno_ct_all_wide$sdq_difficult_C, main = "Boxplot Children: SDQ Total Difficulties Score", ylab = "SDQ Score")
+dev.off()
+```
+
+### SDQ - Internalizing Problems Score:
+```{r SDQ - Internalizing Problems Score}
+describe(pheno_ct_all_wide$sdq_intern_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_sdq_intern_child.png")
+hist(pheno_ct_all_wide$sdq_intern_C, main = "Children: SDQ Internalizing Problems Score", ylab = "Number", xlab = "SDQ Internalizing Problems Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_sdq_intern_child.png")
+plot(density(pheno_ct_all_wide$sdq_intern_C, na.rm = TRUE), main = "Children: SDQ Internalizing Problems Score", xlab = "SDQ Internalizing Problems Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_sdq_intern_child.png")
+boxplot(pheno_ct_all_wide$sdq_intern_C, main = "Boxplot Children: SDQ Internalizing Problems Score", ylab = "SDQ Score")
+dev.off()
+```
+
+## SDQ - Externalizing Problems Score:
+```{r SDQ - Externalizing Problems Score}
+describe(pheno_ct_all_wide$sdq_extern_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_sdq_extern_child.png")
+hist(pheno_ct_all_wide$sdq_extern_C, main = "Children: SDQ Externalizing Problems Score", ylab = "Number", xlab = "SDQ Externalizing Problems Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_sdq_extern_child.png")
+plot(density(pheno_ct_all_wide$sdq_extern_C, na.rm = TRUE), main = "Children: SDQ Externalizing Problems Score", xlab = "SDQ Externalizing Problems Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_sdq_extern_child.png")
+boxplot(pheno_ct_all_wide$sdq_extern_C, main = "Boxplot Children: SDQ Externalizing Problems Score", ylab = "SDQ Score")
+dev.off()
+```
+
+### Sum Score of Children`s Lifetime Traumatic Events:
+```{r Sum Score of Children`s Lifetime Traumatic Events}
+describe(pheno_ct_all_wide$sum_traumaevents_C)
+describeBy(pheno_ct_all_wide$sum_traumaevents_C, pheno_ct_all_wide$Sex_C) # sex differences
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_sum_traumaevents_child.png")
+hist(pheno_ct_all_wide$sum_traumaevents_C, main = "Children`s Lifetime Traumatic Events", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_sum_traumaevents_child.png")
+plot(density(pheno_ct_all_wide$sum_traumaevents_C, na.rm = TRUE), main = "Children`s Lifetime Traumatic Events", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_sum_traumaevents_child.png")
+boxplot(pheno_ct_all_wide$sum_traumaevents_C, main = "Boxplot Children`s Lifetime Traumatic Events", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score of Children`s War-related Traumatic Events:
+```{r Sum Score of Children`s War-related Traumatic Events}
+describe(pheno_ct_all_wide$sum_wartrauma_C)
+describeBy(pheno_ct_all_wide$sum_wartrauma_C, pheno_ct_all_wide$Sex_C) # sex differences
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_wartrauma_child.png")
+hist(pheno_ct_all_wide$sum_wartrauma_C, main = "Children`s War-related Traumatic Events", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_wartrauma_child.png")
+plot(density(pheno_ct_all_wide$sum_wartrauma_C, na.rm = TRUE), main = "Children`s War-related Traumatic Events", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_wartrauma_child.png")
+boxplot(pheno_ct_all_wide$sum_wartrauma_C, main = "Boxplot Children`s War-related Traumatic Events", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score of PTSD Symptom Cluster B, C, D & E:
+```{r Sum Score of PTSD Symptom Cluster B, C, D & E}
+describe(pheno_ct_all_wide$sum_symptomb_C) # cluster B (intrusion)
+describe(pheno_ct_all_wide$sum_symptomc_C) # cluster C (avoidance)
+describe(pheno_ct_all_wide$sum_symptomd_C) # cluster D (negative cognitions & mood)
+describe(pheno_ct_all_wide$sum_symptome_C) # cluster E (hyperarousal)
+```
+
+### Sum Score of All PTSD Symptom Clusters B, C, D and E:
+```{r Sum Score of All PTSD Symptom Clusters B, C, D and E}
+describe(pheno_ct_all_wide$total_ptsdri_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_totalcptsd_child.png")
+hist(pheno_ct_all_wide$total_ptsdri_C, main = "Children: Sum Score of the PTSD Symptom Clusters", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_totalcptsd_child.png")
+plot(density(pheno_ct_all_wide$total_ptsdri_C, na.rm = TRUE), main = "Children: Sum Score of the PTSD Symptom Clusters", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_totalcptsd_child.png")
+boxplot(pheno_ct_all_wide$total_ptsdri_C, main = "Boxplot Children: Sum Score of the PTSD Symptom Clusters", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score of All PTSD Symptom Items:
+```{r Sum Score of All PTSD Symptom Items}
+describe(pheno_ct_all_wide$total_ptsdsym_C)
+describeBy(pheno_ct_all_wide$total_ptsdsym_C, pheno_ct_all_wide$Sex_C) # sex differences
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_total_ptsd_child.png")
+hist(pheno_ct_all_wide$total_ptsdsym_C, main = "Children: Total PTSD Symptom Items", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_total_ptsd_child.png")
+plot(density(pheno_ct_all_wide$total_ptsdsym_C, na.rm = TRUE), main = "Children: Total PTSD Symptom Items", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_total_ptsd_child.png")
+boxplot(pheno_ct_all_wide$total_ptsdsym_C, main = "Boxplot Children: Total PTSD Symptom Items", ylab = "Sum Score")
+dev.off()
+```
+
+### Presence of a PTSD Diagnosis according to DSM5 Criteria:
+```{r Presence of a PTSD Diagnosis according to DSM5 Criteria}
+table(pheno_ct_all_wide$dsm5_diag_C)
+tab.dsm5 <- table(pheno_ct_all_wide$dsm5_diag_C)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_ptsd_diagnosis_child.png")
+barplot(tab.dsm5, ylim = c(0,120), ylab = "number",col = "black", names = c("No DSM5\n PTSD\n Diagnosis", "DSM5 PTSD\n Diagnosis", "DSM5 PTSD\n Diagnosis with\n Dissociative\n Subtype", "DSM5 PTSD\n Symptom Criteria\n fulfilled but\n no impairment"), cex.names=.6, las = 2, main = "Children: DSM5 Diagnosis")
+dev.off()
+```
+
+## Descriptive Data - Female Caregivers
+
+### Age Female Caregivers:
+```{r Age Female Caregivers}
+describe(pheno_ct_all_wide$Age_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/age_fc.png")
+plot(density(pheno_ct_all_wide$Age_M, na.rm = TRUE), main = "Female Caregiver: Age", xlab = "Age in Years")
+dev.off()
+```
+
+### Birthdate:
+```{r Birthdate}
+describe(pheno_ct_all_wide$Birthdate_M)
+plot(density(pheno_ct_all_wide$Birthdate_M, na.rm = TRUE), main = "Female Caregiver: Birthyear", xlab = "Birthyear")
+```
+
+## Country of Origin:
+```{r Female Caregiver: Country of Origin}
+table(pheno_ct_all_wide$Country_origin_M)
+tab.originm <- table(pheno_ct_all_wide$Country_origin_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/origin_fc.png")
+barplot(tab.originm, ylim = c(0,120), ylab = "number",col = "black", las = 1, main = "Female Caregiver: Country Origin")
+dev.off()
+```
+
+### Ethnicity:
+```{r Ethnicity}
+table(pheno_ct_all_wide$Ethnicity_M)
+tab.eth <- table(pheno_ct_all_wide$Ethnicity_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/ethnicity_fc.png")
+barplot(tab.eth, ylim = c(0,120), ylab = "number",col = "black", las = 1, main = "Female Caregiver's Ethnicity")
+dev.off()
+```
+
+### Religion:
+```{r Religion}
+table(pheno_ct_all_wide$Religious_denom_M)
+tab.religion <- table(pheno_ct_all_wide$Religious_denom_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/religion_fc.png")
+barplot(tab.religion, ylim = c(0, 80), names = c("Christian\n (Catholic)", "Christian\n (Protestant)", "Christian\n (Anglican)", "Muslim\n (Shia)", "Muslim\n (Sunni)", "Other"), ylab = "number",col = "black", las = 1, cex.names=.5, main = "Female Caregivers: Religion")
+dev.off()
+```
+
+### Relation to Child:
+```{r Relation to Child}
+table(pheno_ct_all_wide$Relation_to_child_M)
+tab.relation <- table(pheno_ct_all_wide$Relation_to_child_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/relation_fc.png")
+barplot(tab.relation, ylim = c(0,100), names = c("Mother", "Aunt", "Sister", "Grand-\n mother", "Step-\n Mother", "Other", "Sister\n in Law", "Cousin"), ylab = "number",col = "black", las = 1, cex.names=.5, main = "Female Caregivers: Relation to Child")
+dev.off()
+```
+
+### Number of own Children:
+```{r Number of own Children}
+describe(pheno_ct_all_wide$Nr_own_children_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_nr_children_fc.png")
+hist(pheno_ct_all_wide$Nr_own_children_M, main = "Female Caregiver: Number of Own Children", ylab = "Number", xlab = "Number")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_nr_children_fc.png")
+plot(density(pheno_ct_all_wide$Nr_own_children_M, na.rm = TRUE), main = "Female Caregiver: Number of Own Children", xlab = "Number")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_nr_children_fc.png")
+boxplot(pheno_ct_all_wide$Nr_own_children_M, main = "Female Caregiver: Number of Own Children", ylab = "Number")
+dev.off()
+```
+
+### Number of People in Household:
+```{r Number of People in Household}
+describe(pheno_ct_all_wide$Nr_people_household_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_nr_people_fc.png")
+hist(pheno_ct_all_wide$Nr_people_household_M, main = "Female Caregiver: Number of People in Household", ylab = "Number", xlab = "People in Household")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_nr_people_fc.png")
+plot(density(pheno_ct_all_wide$Nr_people_household_M, na.rm = TRUE), main = "Female Caregiver: Number of People in Household", xlab = "People in Household")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_nr_people_fc.png")
+boxplot(pheno_ct_all_wide$Nr_people_household_M, main = "Female Caregiver: Number of People in Household", ylab = "People in Household")
+dev.off()
+```
+
+### Years of Education:
+```{r Years of Education}
+describe(pheno_ct_all_wide$Years_education_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_education_fc.png")
+hist(pheno_ct_all_wide$Years_education_M, main = "Female Caregiver: Years of Education", ylab = "Number", xlab = "Years Education")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_education_fc.png")
+plot(density(pheno_ct_all_wide$Years_education_M, na.rm = TRUE), main = "Female Caregiver: Years of Education", xlab = "Years Education")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_education_fc.png")
+boxplot(pheno_ct_all_wide$Years_education_M, main = "Female Caregiver: Years of Education", ylab = "Years Education")
+dev.off()
+```
+
+### Occupation:
+```{r Occupation}
+table(pheno_ct_all_wide$Occupation_M)
+```
+
+### House Income:
+```{r House Income}
+table(pheno_ct_all_wide$House_income_tsh_M)
+describe(pheno_ct_all_wide$House_income_tsh_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_income_mother.png")
+hist(pheno_ct_all_wide$House_income_tsh_M, main = "Female Caregivers: House Income", ylab = "Number", xlab = "Income")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_income_mother.png")
+plot(density(pheno_ct_all_wide$House_income_tsh_M, na.rm = TRUE), main = "Female Caregiver: House Income", xlab = "Income")
+dev.off()
+```
+
+### Date of Arrival:
+```{r Date of Arrival}
+describe(pheno_ct_all_wide$Month_year_arrival_M)
+```
+
+### Type of Reason for Flight:
+```{r Type of Reason for Flight}
+table(pheno_ct_all_wide$type_of_reason_M)
+tab.flight <- table(pheno_ct_all_wide$type_of_reason_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/reason_flight_fc.png")
+barplot(tab.flight, ylim = c(0,100), names = c("Political\n conflict","Family\n conflict", "Other"), ylab = "number",col = "black", las = 1, cex.names=.8, main = "Female Caregivers: Reasons for flight")
+dev.off()
+```
+
+### Sum Score for BSI Subscale Somatization:
+```{r Sum Score for BSI Subscale Somatization}
+describe(pheno_ct_all_wide$bsi_somat_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_bsisomat_fc.png")
+hist(pheno_ct_all_wide$bsi_somat_M, main = "Female Caregiver: BSI Subscale Somatization", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_bsisomat_fc.png")
+plot(density(pheno_ct_all_wide$bsi_somat_M, na.rm = TRUE), main = "Female Caregiver: BSI Subscale Somatization", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_bsisomat_fc.png")
+boxplot(pheno_ct_all_wide$bsi_somat_M, main = "Female Caregiver: BSI Subscale Somatization", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score for BSI Subscale Depression:
+```{r Sum Score for BSI Subscale Depression}
+describe(pheno_ct_all_wide$bsi_depress_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_bsidepress_fc.png")
+hist(pheno_ct_all_wide$bsi_depress_M, main = "Female Caregiver: BSI Subscale Depression", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_bsidepress_fc.png")
+plot(density(pheno_ct_all_wide$bsi_depress_M, na.rm = TRUE), main = "Female Caregiver: BSI Subscale Depression", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_bsidepress_fc.png")
+boxplot(pheno_ct_all_wide$bsi_depress_M, main = "Female Caregiver: BSI Subscale Depression", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score for BSI Subscale Anxiety:
+```{r Sum Score for BSI Subscale Anxiety}
+describe(pheno_ct_all_wide$bsi_anxiety_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_bsianx_fc.png")
+hist(pheno_ct_all_wide$bsi_anxiety_M, main = "Female Caregiver: BSI Subscale Anxiety", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_bsianx_fc.png")
+plot(density(pheno_ct_all_wide$bsi_anxiety_M, na.rm = TRUE), main = "Female Caregiver: BSI Subscale Anxiety", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_bsianx_fc.png")
+boxplot(pheno_ct_all_wide$bsi_anxiety_M, main = "Female Caregiver: BSI Subscale Anxiety", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score of all BSI Items (General Severity Index):
+```{r Sum Score of all BSI Items (General Severity Index)}
+describe(pheno_ct_all_wide$bsi_gsi_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_bsigsi_fc.png")
+hist(pheno_ct_all_wide$bsi_gsi_M, main = "Female Caregiver's Sum Score of all BSI Items", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_bsigsi_fc.png")
+plot(density(pheno_ct_all_wide$bsi_gsi_M, na.rm = TRUE), main = "Female Caregiver's Sum Score of all BSI Items", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_bsigsi_fc.png")
+boxplot(pheno_ct_all_wide$bsi_gsi_M, main = "Female Caregiver's Sum Score of all BSI Items", ylab = "Sum Score")
+dev.off()
+```
+
+### Total Number of Lifetime Traumatic Experiences:
+```{r Total Number of Lifetime Traumatic Experiences}
+describe(pheno_ct_all_wide$traum_total_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_traumatotal_fc.png")
+hist(pheno_ct_all_wide$traum_total_M, main = "Female Caregiver's Lifetime Traumatic Events", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_traumatotal_fc.png")
+plot(density(pheno_ct_all_wide$traum_total_M, na.rm = TRUE), main = "Female Caregiver's Lifetime Traumatic Events", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_traumatotal_fc.png")
+boxplot(pheno_ct_all_wide$traum_total_M, main = "Female Caregiver's Lifetime Traumatic Events", ylab = "Sum Score")
+dev.off()
+```
+
+### Total Number of War-related Traumatic Experiences:
+```{r Total Number of War-related Traumatic Experiences}
+describe(pheno_ct_all_wide$traum_war_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_wartrauma_fc.png")
+hist(pheno_ct_all_wide$traum_war_M, main = "Female Caregiver's War-related Traumatic Events", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_wartrauma_fc.png")
+plot(density(pheno_ct_all_wide$traum_war_M, na.rm = TRUE), main = "Female Caregiver's War-related Traumatic Events", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_wartrauma_fc.png")
+boxplot(pheno_ct_all_wide$traum_war_M, main = "Female Caregiver's War-related Traumatic Events", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score of Female Caregiver`s PTSD Symptoms:
+```{r Sum Score of Female Caregiver`s PTSD Symptoms}
+describe(pheno_ct_all_wide$pcl_total_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_ptsdsymtotal_fc.png")
+hist(pheno_ct_all_wide$pcl_total_M, main = "Female Caregiver: Sum Score of PTSD Symptoms", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_ptsdsymtotal_fc.png")
+plot(density(pheno_ct_all_wide$pcl_total_M, na.rm = TRUE), main = "Female Caregiver: Sum Score of PTSD Symptoms", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_ptsdsymtotal_fc.png")
+boxplot(pheno_ct_all_wide$pcl_total_M, main = "Female Caregiver: Sum Score of PTSD Sympoms", ylab = "Sum Score")
+dev.off()
+```
+
+### Presence of PTSD Diagnosis according to DSM-5:
+```{r Presence of PTSD Diagnosis according to DSM-5}
+table(pheno_ct_all_wide$dsm5_diag_M)
+tab.mdsm5 <- table(pheno_ct_all_wide$dsm5_diag_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/ptsddiagnosis_fc.png")
+barplot(tab.mdsm5, ylim = c(0,120), ylab = "number",col = "black", las = 1, main = "Female Caregiver: DSM5 Diagnosis")
+dev.off()
+```
+
+### Total Drug Involvement:
+```{r Total Drug Involvement}
+describe(pheno_ct_all_wide$tot_drug_inv_M)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_drugs_fc.png")
+hist(pheno_ct_all_wide$pcl_total_M, main = "Female Caregivers: Total Drug Involvement", ylab = "Number", xlab = "Drug Involvement")
+dev.off()
+```
+
+## Descriptive Data - Male Caregivers
+
+### Age:
+```{r Male Caregivers: Age in Years}
+describe(pheno_ct_all_wide$Age_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_age_mc.png")
+hist(pheno_ct_all_wide$Age_F, main = "Male Caregivers: Age", ylab = "Number", xlab = "Age in Years")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_age_mc.png")
+plot(density(pheno_ct_all_wide$Age_F, na.rm = TRUE), main = "Male Caregivers: Age", xlab = "Age in Years")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_age_mc.png")
+boxplot(pheno_ct_all_wide$Age_F, main = "Male Caregivers: Age", ylab = "Age in Years")
+dev.off()
+```
+
+### Birthyear:
+```{r Birthyear}
+describe(pheno_ct_all_wide$Birthdate_F)
+```
+
+### Country of Origin:
+```{r Male Caregivers: Country of Origin}
+table(pheno_ct_all_wide$Country_origin_F)
+tab.originf <- table(pheno_ct_all_wide$Country_origin_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/origin_mc.png")
+barplot(tab.originf, ylim = c(0,120), ylab = "number",col = "black", las = 1, main = "Male Caregivers: Country Origin")
+dev.off()
+```
+
+### Ethnicity:
+```{r Male Caregivers: Ethnicity}
+table(pheno_ct_all_wide$Ethnicity_F)
+tab.ethnicity <- table(pheno_ct_all_wide$Ethnicity_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/ethnicity_mc.png")
+barplot(tab.ethnicity, ylim = c(0,120), ylab = "number",col = "black", las = 1, main = "Male Caregivers: Ethnicity")
+dev.off()
+```
+
+### Religion:
+```{r Male Caregivers: Religion}
+table(pheno_ct_all_wide$Religious_denom_F)
+tab.religion <- table(pheno_ct_all_wide$Religious_denom_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/religion_mc.png")
+barplot(tab.religion, ylim = c(0,120), names = c("Christian\n (Catholic)", "Christian\n (Protestant)", "Christian\n (Anglican)", "Muslim\n (Shia)", "Muslim\n (Sunni)", "Other"), ylab = "number",col = "black", las = 1, cex.names=.5, main = "Male Caregivers: Religion")
+dev.off()
+```
+
+### Relation to Child:
+```{r Male Caregivers: Relation to Child}
+table(pheno_ct_all_wide$Relation_to_child_F)
+tab.relation <- table(pheno_ct_all_wide$Relation_to_child_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/relation_mc.png")
+barplot(tab.relation, ylim = c(0,120), names = c("Father", "Uncle", "Brother", "Grand-\n father","Step-\n father", "Other", "Brother\n in law"), ylab = "number",col = "black", las = 1, cex.names=.6, main = "Male Caregivers: Relation to Child")
+dev.off()
+```
+
+### Number of own Children:
+```{r Male Caregivers: Number of own Children}
+describe(pheno_ct_all_wide$Nr_own_children_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_children_mc.png")
+hist(pheno_ct_all_wide$Nr_own_children_F, main = "Male Caregivers: Number of own Children", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_children_mc.png")
+plot(density(pheno_ct_all_wide$Nr_own_children_F, na.rm = TRUE), main = "Male Caregivers: Number of own Children", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_children_mc.png")
+boxplot(pheno_ct_all_wide$Nr_own_children_F, main = "Male Caregivers: Number of own Children", ylab = "Sum Score")
+dev.off()
+```
+
+### Number of People in Household:
+```{r Male Caregivers: Number of People in Household}
+describe(pheno_ct_all_wide$Nr_people_household_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_house_mc.png")
+hist(pheno_ct_all_wide$Nr_people_household_F, main = "Male Caregivers: Number of People in Household", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_house_mc.png")
+plot(density(pheno_ct_all_wide$Nr_people_household_F, na.rm = TRUE), main = "Male Caregivers: Number of People in Household", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_house_mc.png")
+boxplot(pheno_ct_all_wide$Nr_people_household_F, main = "Male Caregivers: Number of People in Household", ylab = "Sum Score")
+dev.off()
+```
+
+### Years of Education:
+```{r Male Caregivers: Years of Education}
+describe(pheno_ct_all_wide$Years_education_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_education_mc.png")
+hist(pheno_ct_all_wide$Years_education_F, main = "Male Caregivers: Years of Education", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_education_mc.png")
+plot(density(pheno_ct_all_wide$Years_education_F, na.rm = TRUE), main = "Male Caregivers: Years of Education", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_education_mc.png")
+boxplot(pheno_ct_all_wide$Years_education_F, main = "Male Caregivers: Years of Education", ylab = "Sum Score")
+dev.off()
+```
+
+### Occupation:
+```{r Male Caregivers: Occupation}
+table(pheno_ct_all_wide$Occupation_F)
+```
+
+### House Income:
+```{r Male Caregivers: House Income}
+table(pheno_ct_all_wide$House_income_tsh_F)
+describe(pheno_ct_all_wide$House_income_tsh_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_income_father.png")
+hist(pheno_ct_all_wide$House_income_tsh_F, main = "Male Caregivers: House Income", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_income_father.png")
+plot(density(pheno_ct_all_wide$House_income_tsh_F, na.rm = TRUE), main = "Male Caregiver: House Income", xlab = "Income")
+dev.off()
+```
+### Date of Arrival:
+```{r Male Caregivers: Date of Arrival}
+table(pheno_ct_all_wide$Month_year_arrival_F)
+describe(pheno_ct_all_wide$Month_year_arrival_F)
+```
+
+### Type of Reason for Flight:
+```{r Male Caregivers: Type of Reason for Flight}
+table(pheno_ct_all_wide$type_of_reason_F)
+tab.flight.mc <- table(pheno_ct_all_wide$type_of_reason_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/reason_flight_mc.png")
+barplot(tab.flight.mc, ylim = c(0,120), names = c("Plotical\n conflict", "Family\n conflict", "Other"), ylab = "number",col = "black", las = 1, cex.names=.8, main = "Male Caregivers: Reason for Flight")
+dev.off()
+```
+
+### Sum Score for BSI Subscale Somatization:
+```{r Male Caregivers: Sum Score for BSI Subscale Somatization}
+describe(pheno_ct_all_wide$bsi_somat_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_bsisomat_mc.png")
+hist(pheno_ct_all_wide$bsi_somat_F, main = "Male Caregivers: BSI Subscale Somatization", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_bsisomat_mc.png")
+plot(density(pheno_ct_all_wide$bsi_somat_F, na.rm = TRUE), main = "Male Caregivers: BSI Subscale Somatization", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_bsisomat_mc.png")
+boxplot(pheno_ct_all_wide$bsi_somat_F, main = "Male Caregivers: BSI Subscale Somatization", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score for BSI Subscale Depression:
+```{r Male Caregivers: Sum Score for BSI Subscale Depression}
+describe(pheno_ct_all_wide$bsi_depress_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_bsidepress_mc.png")
+hist(pheno_ct_all_wide$bsi_depress_F, main = "Male Caregivers: BSI Subscale Depression", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_bsidepress_mc.png")
+plot(density(pheno_ct_all_wide$bsi_depress_F, na.rm = TRUE), main = "Male Caregivers: BSI Subscale Depression", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_bsidepress_mc.png")
+boxplot(pheno_ct_all_wide$bsi_depress_F, main = "Male Caregivers: BSI Subscale Depression", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score for BSI Subscale Anxiety:
+```{r Male Caregivers: Sum Score for BSI Subscale Anxiety}
+describe(pheno_ct_all_wide$bsi_anxiety_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_bsianx_mc.png")
+hist(pheno_ct_all_wide$bsi_anxiety_F, main = "Male Caregivers: BSI Subscale Anxiety", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_bsianx_mc.png")
+plot(density(pheno_ct_all_wide$bsi_anxiety_F, na.rm = TRUE), main = "Male Caregivers: BSI Subscale Anxiety", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_bsianx_mc.png")
+boxplot(pheno_ct_all_wide$bsi_anxiety_F, main = "Male Caregivers: BSI Subscale Anxiety", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score of all BSI Items (General Severity Index):
+```{r Male Caregivers: Sum Score of all BSI Items (General Severity Index)}
+describe(pheno_ct_all_wide$bsi_gsi_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_bsigsi_mc.png")
+hist(pheno_ct_all_wide$bsi_gsi_F, main = "Male Caregivers: Sum Score of all BSI Items", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_bsigsi_mc.png")
+plot(density(pheno_ct_all_wide$bsi_gsi_F, na.rm = TRUE), main = "Male Caregivers: Sum Score of all BSI Items", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_bsigsi_mc.png")
+boxplot(pheno_ct_all_wide$bsi_gsi_F, main = "Male Caregivers: Sum Score of all BSI Items", ylab = "Sum Score")
+dev.off()
+```
+
+### Total Number of Lifetime Traumatic Experiences:
+```{r Male Caregivers: Total Number of Lifetime Traumatic Experiences}
+describe(pheno_ct_all_wide$traum_total_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_traumatotal_mc.png")
+hist(pheno_ct_all_wide$traum_total_F, main = "Male Caregivers: Lifetime Traumatic Events", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_traumatotal_mc.png")
+plot(density(pheno_ct_all_wide$traum_total_F, na.rm = TRUE), main = "Male Caregivers: Lifetime Traumatic Events", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_traumatotal_mc.png")
+boxplot(pheno_ct_all_wide$traum_total_F, main = "Male Caregivers: Lifetime Traumatic Events", ylab = "Sum Score")
+dev.off()
+```
+
+### Total Number of War-related Traumatic Experiences:
+```{r Male Caregivers: Total Number of War-related Traumatic Experiences}
+describe(pheno_ct_all_wide$traum_war_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_wartrauma_mc.png")
+hist(pheno_ct_all_wide$traum_war_F, main = "Male Caregivers: War-related Traumatic Events", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_wartrauma_mc.png")
+plot(density(pheno_ct_all_wide$traum_war_F, na.rm = TRUE), main = "Male Caregivers: War-related Traumatic Events", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_wartrauma_mc.png")
+boxplot(pheno_ct_all_wide$traum_war_F, main = "Male Caregivers: War-related Traumatic Events", ylab = "Sum Score")
+dev.off()
+```
+
+### Sum Score of PTSD Symptoms:
+```{r Male Caregivers: Sum Score of PTSD Symptoms}
+describe(pheno_ct_all_wide$pcl_total_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_ptsdsymtotal_mc.png")
+hist(pheno_ct_all_wide$pcl_total_F, main = "Male Caregivers: Sum Score of PTSD Sympoms", ylab = "Number", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_ptsdsymtotal_mc.png")
+plot(density(pheno_ct_all_wide$pcl_total_F, na.rm = TRUE), main = "Male Caregivers: Sum Score of PTSD Sympoms", xlab = "Sum Score")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/box_ptsdsymtotal_mc.png")
+boxplot(pheno_ct_all_wide$pcl_total_F, main = "Male Caregivers: Sum Score of PTSD Sympoms", ylab = "Sum Score")
+dev.off()
+```
+
+### Presence of PTSD Diagnosis according to DSM-5:
+```{r Male Caregivers: Presence of PTSD Diagnosis according to DSM-5}
+table(pheno_ct_all_wide$dsm5_diag_F)
+tab.fdsm5_diag <- table(pheno_ct_all_wide$dsm5_diag_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/ptsddiagnosis_mc.png")
+barplot(tab.fdsm5_diag, ylim = c(0,120), ylab = "number",col = "black", las = 1, main = "Male Caregivers: DSM5 Diagnosis")
+dev.off()
+```
+
+### Total Drug Involvement:
+```{r Male Caregivers: Total Drug Involvement}
+describe(pheno_ct_all_wide$tot_drug_inv_F)
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/hist_drugs_father.png")
+hist(pheno_ct_all_wide$pcl_total_F, main = "Male Caregivers: Total Drug Involvement", ylab = "Number", xlab = "Drug Involvement")
+dev.off()
+png(width = 4000, height = 3200, res = 450, filename = "C:/Users/kati-/Dropbox/PC/Documents/Wichtige Unterlagen/HiWi Job 2021/Meine Dokumente/Deskriptive Datenauswertung/plot_drugs_father.png")
+plot(density(pheno_ct_all_wide$pcl_total_F, na.rm = TRUE), main = "Male Caregivers: Total Drug Involvement", xlab = "Drug Involvement")
+dev.off()
+```
